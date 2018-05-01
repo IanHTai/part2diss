@@ -1,0 +1,4 @@
+machine learning a probabilistic perspective murphy
+chris bishop pattern recognition and machine learning
+deep learning goodfellow bengio
+sutton and barto reinforcement learning

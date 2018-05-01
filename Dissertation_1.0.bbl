@@ -1,0 +1,41 @@
+\begin{thebibliography}{1}
+
+\bibitem{Malkiel89}
+Burton~G. Malkiel.
+\newblock Efficient market hypothesis.
+\newblock In John Eatwell, Murray Milgate, and Peter Newman, editors, {\em
+  Finance}, pages 127--134. Palgrave Macmillan UK, London, 1989.
+
+\bibitem{Goodfellow-et-al-2016}
+Ian Goodfellow, Yoshua Bengio, and Aaron Courville.
+\newblock {\em Deep Learning}.
+\newblock MIT Press, 2016.
+\newblock \url{http://www.deeplearningbook.org}.
+
+\bibitem{Mitchell97}
+Thomas~M. Mitchell.
+\newblock {\em Machine Learning}.
+\newblock McGraw-Hill, Inc., New York, NY, USA, 1 edition, 1997.
+
+\bibitem{Holden18}
+Sean~B. Holden.
+\newblock Machine learning and bayesian inference, 2018.
+\newblock
+  \url{https://www.cl.cam.ac.uk/teaching/1718/MLBayInfer/ml-bayes-18.pdf}.
+
+\bibitem{Holden18AI1}
+Sean~B. Holden.
+\newblock Artificial intelligence 1, 2018.
+\newblock \url{https://www.cl.cam.ac.uk/teaching/1718/ArtInt/ai1-18.pdf}.
+
+\bibitem{Hochreiter97}
+Sepp Hochreiter and Jürgen Schmidhuber.
+\newblock Long short-term memory.
+\newblock 9:1735--80, 12 1997.
+
+\bibitem{Gers99}
+Felix~A. Gers, J\"{u}rgen Schmidhuber, and Fred Cummins.
+\newblock Learning to forget: Continual prediction with lstm.
+\newblock {\em Neural Computation}, 12:2451--2471, 1999.
+
+\end{thebibliography}
