@@ -10,8 +10,15 @@
 \usepackage{tikz}
 \usepackage{float}
 \usepackage{cleveref}
+\usepackage{booktabs}
+
+\edef\restoreparindent{\parindent=\the\parindent\relax}
+\usepackage{parskip}
+\restoreparindent
 
 \renewcommand{\vec}[1]{\mathbf{#1}}
+\DeclareMathOperator*{\argmax}{argmax}
+\DeclareMathOperator*{\argmin}{argmin}
 
 \crefformat{section}{\S#2#1#3} % see manual of cleveref, section 8.2.1
 \crefformat{subsection}{\S#2#1#3}
@@ -176,34 +183,36 @@ The wealth of available data regarding financial markets makes it a prime target
 
 
 \chapter{Preparation}
+\label{sec:prep}
 
 This chapter includes all of the work that was completed before implementation began.
 This includes the theory behind each Machine Learning model (\cref{sec:introNN},
-\cref{sec:introSVM}, and \cref{sec:introNB}), financial
-theory (\cref{sec:introFin}), feature extraction (\cref{sec:introFeat}), 
+\cref{sec:introSVM}, and \cref{sec:introNB}), 
 an outline of the project's requirements (\cref{sec:introReq}), tools and libraries
-considered and used (\cref{sec:introTool}), development model (\cref{sec:introSoft}),
-an early outline for implementation (\cref{sec:introImpl}), and the starting point
-for my project (\cref{sec:introStart})
+considered and used (\cref{sec:introTool}), the starting point
+for my project (\cref{sec:introStart}), and the development model and
+early outline for implementation (\cref{sec:introImpl}).
 
 \section{Neural Networks}
 \label{sec:introNN}
 
 The theory regarding Recursive Neural Networks and
-Long Short-Term Memory Networks in this section is adapted from \cite{Goodfellow-et-al-2016}.
+Long Short-Term Memory Networks in this section is partially adapted from \cite{Goodfellow-et-al-2016,
+Hochreiter97, Gers99, Graves13}.
 
 \subsection{Introduction}
 
 Before delving into Recurrent Neural Networks (RNNs), we must first discuss
 the basics of Machine Learning (ML). An ML algorithm is one that learns from
 data. Mitchell (1997) provides a definition for learning:
-"A computer program is said to learn from experience E with respect to some
+``A computer program is said to learn from experience E with respect to some
 class of tasks T and performance measure P, if its performance at tasks in T, as
-measured by P, improves with experience E." \cite{Mitchell97} 
+measured by P, improves with experience E."\cite{Mitchell97} 
 
 The use of a recurrent neural network in my project is in the manner of
-supervised learning. Supervised learning is a subset of Machine Learning,
-where all given data is labelled, such that each input feature vector $\vec{x} \in \R^m$
+supervised learning. Supervised learning is a subset of ML,
+where all given data is labelled, such that each input, a vector of \textbf{features} (distinguishing
+numerical characteristics of the input) $\vec{x} \in \R^m$,
 is associated with a label $y$. This label can either be a discrete variable where 
 $y \in C = [C_1, C_2, C_3, ..., C_n]$,
 in the case of classification, or a continuous variable where $y \in \R$, in the case of regression.
@@ -245,14 +254,14 @@ usually either $[0,1]$ or $[-1,1]$. Typical activation functions are as follows:
 
 \begin{figure}[h]
 \includegraphics[width=\textwidth]{ActivationFunsCrop.png}
-\caption{Plots of Sigmoid, RELU, and Hyperbolic Tangent functions}
+\caption{Plots of sigmoid, RELU, and hyperbolic tangent functions}
 \end{figure}
 
 The output is then fed as either an input to other artificial neurons, or is the overall
 output of the neural network.
 
 \subsection{Training}
-\label{sec:introTrain}
+\label{sec:introTraining}
 
 The training of the network using the training set first includes initialization of the 
 weights and biases. Initialization will be covered in depth in the Implementation section
@@ -302,12 +311,12 @@ convergence during the training period, and if too large, the NN may never find 
 
 	\node[label={Input Layer},unit](x0) at (0,3.5){$x_0$};
 	\node[unit](x1) at (0,2){$x_1$};
-	\node at (0,1){\vdots};
+	\node at (0,1.1){\vdots};
 	\node[unit](xd) at (0,0){$x_n$};
 
 	\node[label={Node $i$}, unit](h10) at (5,4){$b_i$};
 	\node[unit](h11) at (5,2.5){};
-	\node at (3,1.5){\vdots};
+	\node at (5,1.1){\vdots};
 	\node[unit](h1m) at (5,-0.5){};
 
 	\node[label={Node $j$, Output},unit](y2) at (10,2){};
@@ -382,7 +391,7 @@ label the bias as an extra weight, multiplied by an arbitrary $z = 1$.
 	\draw[->] (h2) -- (11.5,3.5) node[midway, above] {f};
 	
 \end{tikzpicture}
-\caption[States of a Dynamic System]{The evolution of state in a system\footnotemark}
+\caption[States of a dynamic system]{The evolution of state in a system\footnotemark}
 \label{fig:seqIn}
 \end{figure}
 
@@ -466,18 +475,16 @@ take the relevant output.
 The relevant equations regarding the hidden state and output of an RNN are as follows:
 
 \begin{align}
-\vec{a}^{(t)} &= \vec{b} + \vec{Wh}^{(t-1)} + \vec{Ux}^{(t)}\\
-\vec{h}^{(t)} &= \text{tanh}(\vec{a}^{(t)})\\
-\vec{o}^{(t)} &= \vec{c} + \vec{Vh}^{(t)}
+\vec{h}^{(t)} &= \tanh(\vec{b}_h + \vec{W}_hh\vec{h}^{(t-1)} + \vec{W}_xh\vec{x}^{(t)})\\
+\vec{o}^{(t)} &= \vec{b}_o + \vec{W}_oh\vec{h}^{(t)}
 \end{align}
 
-where $\vec{h}^(t)$ represents the hidden state of the RNN unit at time $t$,
-and $\vec{o}^(t)$ represents the output of the RNN unit at time $t$. The variables
-$\vec{W}$, $\vec{U}$, and $\vec{V}$ represent the weights associated with the previous 
+where $\vec{h}^{(t)}$ represents the hidden state of the RNN unit at time $t$,
+and $\vec{o}^{(t)}$ represents the output of the RNN unit at time $t$. The various
+$\vec{W}$s represent represent the weights associated with the previous 
 time step's hidden value, the current input, and the current hidden state value, respectively.
-The variables $\vec{b}$ and $\vec{c}$ represent the biases of the hidden state and the
-output, respectively\footnote{For reference, the weights are presented in upper case and the
-biases in lower case simply for ease of reading}.
+The variables $\vec{b}$ represent the biases of the hidden state and the
+output, respectively\footnote{For reference, the weights are matrices, thus presented in upper case}.
 
 A similar backpropagation algorithm to what was described in \cref{sec:introTraining} can be used
 to train such an RNN -- however, we must also be backpropagating through the time steps. This algorithm
@@ -486,7 +493,7 @@ previous backpropagation algorithm to the unraveled computation graph of the RNN
 
 The key problem with the RNN that prevents it from being used in its purest form is the
 \textbf{vanishing/exploding gradient problem}. The vanishing/exploding gradient problem
-in its simplest form is the tendency for gradients that are propagated through many stages
+is the tendency for gradients that are propagated through many stages
 to either vanish (become negligible) or explode (become disproportionately large). While the
 former is only a problem with trying to model long-term dependencies, the latter can completely
 disrupt the parameter optimization algorithm. The problem of the vanishing gradient follows naturally,
@@ -497,121 +504,722 @@ of the weight of the hidden unit over many time steps.
 \subsection{Long Short-Term Memory Networks}
 \label{sec:introLSTM}
 
-The LSTM is one of several attempted solutions to the vanishing/exploding
+The LSTM is perhaps the most popular solution to the vanishing/exploding
 gradient problem of vanilla RNNs\footnote{Other solutions, such as the Gated Recurrent Unit (GRU), are
-not within the scope of this project and will not be discussed}\cite{Hochreiter97, Gers99}. The LSTM, a gated RNN, is based on the
+not within the scope of this project and will not be discussed}. The LSTM, a gated RNN, is based on the
 idea of creating paths for dependencies through time where the derivatives will neither vanish
 nor explode, by introducing variability to the connection weights between time steps and a learned
-method of forgetting the old state. 
+method of forgetting the old state.
+
+The original proposal by Hochreiter and Schmidhuber for the LSTM states that it solves the
+vanishing/exploding gradient problem by ``an efficient, gradient-based algorithm for
+an architecture enforcing constant (thus, neither exploding nor vanishing)
+error flow through internal states of special units (provided the gradient
+computation is truncated at certain architecture-specific points)"\cite{Hochreiter97}.
+This algorithm was the inclusion of an internal recurrence in addition to the outer
+occurrence of an RNN. This internal recurrence, the `state' in \cref{fig:LSTMCell}
+is preserved in the cell across time.
+
+This design was later improved upon by Gers, Schmidhuber and Cummins,
+who observed that the ``LSTM fails to learn to correctly process certain
+very long or continual time series that are not \textit{a priori} segmented into 
+appropriate training subsequences with clearly defined beginnings and ends"\cite{Gers99}.
+This is because the values of the LSTM cell state can grow without bound if the
+input stream is continuous. Thus, their paper introduced the forget gate,
+whose role is to learn to reset the LSTM cell's memory contents when
+the information is not needed anymore. \cref{fig:LSTMCell} shows
+the resulting computational graph for an LSTM cell with the addition of forget gates.
 
 \begin{figure}[H]
+\center\textbf{LSTM Cell}
 \centering
 \begin{tikzpicture}[shorten >=1pt]
+	\node(vspace) at (0,10){};
+	
 	\tikzstyle{unit}=[draw,shape=circle,minimum size=1.15cm]
 	
-	\tikzstyle{gate}=[draw,shape=circle,minimum size=2.5cm]
+	\tikzstyle{gate}=[draw,shape=circle,minimum size=1.9cm]
 	
-	\node(in) at (0,0) {input $\vec{x}$};
+	\node(rec) at (1,0) {};
+	\node at (1,-0.2){$\vec{x}_t$};
+	\node[label={[align=center]$\vec{h}_{t-1}$}](recText) at (-2.3,3){};
+	\node[minimum size=0.1pt,scale=0.1](in) at (0,3.5) {};
+	\node(inHelp) at (-0.6,3.5) {};
+	\node(trueIn) at (-2,3.5) {};
 	
-	\node[gate](input) at (2,2){input node};
-	\node[gate](inGate) at (5,2){input gate};
-	\node[gate](forget) at (8,2){forget gate};
-	\node[gate](outGate) at (11,2){output gate};
+	\node[gate](input) at (3,2.5){\scriptsize{input node}};
+	\node[gate](inGate) at (3,4.5){\scriptsize{input gate}};
+	\node[gate](forget) at (3,6.5){\scriptsize{forget gate}};
+	\node[gate](outGate) at (3,8.5){\scriptsize{output gate}};
 	
-	\node[unit](inx) at (3.5,5){$\times$};
-	\node[unit](hiddenP) at (3.5,7){$+$};
 	
-	\node[unit](hidden) at (5.5,7){$\times$};
-	\node[unit](outx) at (3.5,9){$\times$};
-
+	\node[unit](inx) at (5,3.5){$\times$};
+	\node[unit](hiddenP) at (7,3.5){$\vec{c}_t$};
 	
-	\draw[->] (in) to[out=0, in=-90] (input);
-	\draw[->] (in) to[out=0, in=180] (3.5,0) to[out=0,in=-90] (inGate);
-	\draw[->] (in) to[out=0, in=180] (6.5,0) to[out=0,in=-90] (forget);
-	\draw[->] (in) to[out=0, in=180] (9.5,0) to[out=0,in=-90] (outGate);
+	\node[unit](hidden) at (7,5.5){$\times$};
+	\node[unit](outx) at (9,3.5){$\times$};
+	
+	
+	%\draw[->] (trueIn) to[in=180,out=180] (in) to[in=110,out=0] (0.5,2.5) to[in=180,out=-110] (input);
+	%\draw[->] (trueIn) to[in=180,out=180] (in) to[in=-110,out=0] (0.5,4.5) to[in=180,out=110] (inGate);
+	%\draw[->] (trueIn) to[in=180,out=180] (in) to[in=-120,out=0] (0.5,6.5) to[in=180,out=120] (forget);
+	%\draw[->] (trueIn) to[in=180,out=180] (in) to[in=-130,out=0] (0.5,8.5) to[in=180,out=130] (outGate);
+	
+	\draw (trueIn) to[out=0, in=180] (-0.423,3.5);
+	
+	\draw[->] (inHelp) .. controls (in) and (0.5,2.5) .. (input);
+	\draw[->] (inHelp) .. controls (in) and (0.5,4.5) .. (inGate);
+	\draw[->] (inHelp) .. controls (in) and (0.5,6.5) .. (forget);
+	\draw[->] (inHelp) .. controls (in) and (0,8.5) .. (outGate);
+	
+	\draw[->] (rec) to[out=90, in=-90] (1,1.5) to[out=90,in=190]  (input);
+	\draw[->] (rec) to[out=90, in=-90] (1,3.5) to[out=90,in=190] (inGate);
+	\draw[->] (rec) to[out=90, in=-90] (1,5.5) to[out=90,in=190] (forget);
+	\draw[->] (rec) to[out=90, in=-90] (1,7.5) to[out=90,in=190] (outGate);
 	
 	\draw[->] (input) -- (inx);
 	\draw[->] (inGate) -- (inx);
 	\draw[->] (inx) -- (hiddenP);
 	
-	\draw[->] (hidden) .. controls (4.5,6.5) .. (hiddenP);
-	\draw[->] (hiddenP) .. controls (4.5,7.5) .. (hidden);
+	\draw[->] (hidden) .. controls (6.5,4.5) .. (hiddenP) node[midway, left] {\scriptsize{state}};
+	\draw[->] (hiddenP) .. controls (7.5,4.5) .. (hidden);
 	
-	\fill[black] (4.375, 7.545) rectangle (4.625,7.295);
+	\fill[black] (7.545, 4.375) rectangle (7.295,4.625);
 	
 	\draw[->] (hiddenP) -- (outx);
 	
 	\draw[->] (forget) -- (hidden);
-	\draw[->] (outGate) .. controls (11,9) .. (outx);
+	\draw[->] (outGate) .. controls (9,8.5) .. (outx);
 	
-	\draw[->] (outx) -- (3.5,11) node[midway, right] {output};
+	\draw[->] (outx) -- (11,3.5) node[right] {$\vec{h}_t$};
+	
+	\draw[rounded corners, dashed, very thick] (-0.8, 1.2) rectangle (10, 9.8) {};
 	
 \end{tikzpicture}
-\caption[The cyclic form of an LSTM cell]{The cyclic form of an LSTM cell\footnotemark}
+\caption[Diagram of an LSTM cell]{The computational graph of an LSTM cell\footnotemark}
 \label{fig:LSTMCell}
 \end{figure}
 
-\footnotetext{The rectangle in the cyclic arrow represents a delay of 1 time step.}
+\footnotetext{The black rectangle on the arrow between the looping nodes represents a delay of 1 time step.}
 
-\section{Support Vector Machines}
+\cref{fig:LSTMCell} shows the computational graph of an LSTM cell at time $t$, where $\vec{x}_t$ is
+the input vector at time $t$, $\vec{c}_t$ is cell activation vector at time $t$,
+and $\vec{h}_t$ and $\vec{h}_{t-1}$ are the outer occurrences (and outputs) of the RNN at times $t$ and $t-1$, respectively.
+
+\vbox{
+The formulation for the various gates, nodes, and outputs shown are as follows:
+\begin{itemize}
+	\item
+	Input gate
+	\begin{equation}
+		\vec{i}_t = \sigma(\vec{W}_{xi}\vec{x}_t + \vec{W}_{hi}\vec{h}_{t-1} + \vec{W}_{ci}\vec{c}_{t-1} + \vec{b}_i)
+	\end{equation}
+	
+	\item
+	Forget gate
+	\begin{equation}
+		\vec{f}_t = \sigma(\vec{W}_{xf}\vec{x}_t + \vec{W}_{hf}\vec{h}_{t-1} + \vec{W}_{cf}\vec{c}_{t-1} + \vec{b}_f)
+	\end{equation}
+	
+	\item
+	Cell activation
+	\begin{equation}
+		\vec{c}_t = \vec{f}_t\vec{c}_{t-1} + \vec{i}_t\tanh(\vec{W}_{xc}\vec{x}_t + \vec{W}_{hc}\vec{h}_{t-1} + \vec{b}_c)
+	\end{equation}
+	
+	\item
+	Output gate
+	\begin{equation}
+		\vec{o}_t = \sigma(\vec{W}_{xo}\vec{x}_t + \vec{W}_{ho}\vec{h}_{t-1} + \vec{W}_{co}\vec{c}_{t-1} + \vec{b}_o)
+	\end{equation}
+	
+	\item
+	Output
+	\begin{equation}
+		\vec{h}_t = \vec{o}_t\tanh(\vec{c}_t)
+	\end{equation}
+	
+\end{itemize}}
+where $\sigma$ is the logistic sigmoid function, and all of the gates and the outputs are vectors
+of the same size. The weight matrices ($\vec{W}$) in each gate are diagonal, so each element $m$ in the gate
+vector only receives input from the respective element $m$ of the input vectors. 
+
+\subsection{Deep LSTM Network}
+\label{sec:introDeepLSTM}
+
+In 2013, Graves et. al showed that LSTMs provide much stronger prediction capabilities if `stacked',
+in the form of hidden layers between the input and output, similar to the manner of typical deep
+neural networks\cite{Graves13}. This is what we will call a \textbf{deep LSTM network}.
+The structural implication of stacking layers is such that the outputs of a layer
+are fed as the inputs to the next layer, and that each layer is simply a collection of independent
+LSTM cells. The advantage of such a model is that it is able to approximate functions that are non-linear --
+the more layers in the network, the more complex the possible approximation.
+
+In this schema, the number of LSTM cells in each subsequent hidden layer is kept constant,
+so as to incorporate a direct single output-input relationship between cells of consecutive layers.
+The final output $\vec{y}_t$ of the LSTM network is then a final output calculation defined by:
+
+\begin{equation}
+	\vec{y}_t = \vec{W}_{\vec{h}^Ny}\vec{H}_t^N + \vec{b}_y
+\end{equation}
+
+where $N$ is the total number of layers in the LSTM network, and $\vec{H}_t^N$ is the matrix
+of the $h_t$ vectors for all LSTM cells in layer $N$.
+
+This deep LSTM network structure is what I chose as my primary learning model
+framework for stock price prediction. This framework's capacity to learn
+both long-term and short-term dependencies in data makes it suitable for a large
+variety of learning tasks whose inputs are sequential, such as time series prediction,
+speech recognition, semantic parsing, and even composition of music\footnote{\url{http://people.idsia.ch/~juergen/blues/}}. 
+Thus, it is a good candidate for tackling the learning problem of stock price prediction.
+
+\section{Sentiment Classifiers}
+
+\subsection{Support Vector Machines}
 \label{sec:introSVM}
 
+The theory behind Support Vector Machines in this section is adapted from
+\cite{Holden18}.
 
-\section{Naive Bayes}
+\begin{figure}[h]
+	\includegraphics[width=\textwidth]{SVMDataCrop.png}
+	\caption[Example of the kernel trick]{Separating linearly inseparable data by introducing an additional dimension\footnotemark}
+	\label{fig:SVMSep}
+\end{figure}
+
+\footnotetext{The additional dimension is $x_1x_2$. The green plane indicates the plane of separation between classes}
+
+Support Vector Machines (SVMs) are currently the gold standard for learning problems where
+the availability of data is not sufficient for a well-trained NN\cite{Fernandez14}. Because sentiment
+labelling of the Twitter dataset was performed manually, the SVM is a prime candidate
+for our problem of sentiment classification.
+
+SVMs tackle the problem of efficiently computing a model
+for linearly inseparable data. \cref{fig:SVMSep} displays the usage of the \textbf{kernel trick}, which is the
+introduction of new dimensions dependent on the original dimensions in order to increase linear separability.
+This is the main idea behind SVMs.
+
+In order to understand SVMs, we must first delve into pattern recognition theory.
+A pattern recognition classifier estimates a function
+
+\begin{align}
+\begin{split}
+	&f:\R^N \rightarrow \{\pm 1\}\\
+	&f(\vec{x}_n) = y_n
+\end{split}
+\end{align}
+
+where N is the dimensionality of the input vector, and $\vec{x}_n$ and $y_n$ are the input vector and
+correct label of the example $n$, respectively\cite{Hearst98}. This function aims to correctly classify
+\textit{new} examples -- examples that were not included in the training set but are sampled from
+the same distribution. If we put no restrictions on the estimation of $f$, the created function
+may perform exceedingly well on the training data, but fail miserably on the unseen data. Such a
+classifier would be effectively useless in the real world. Statistical learning theory shows that
+we must restrict the class of functions that the machine can learn to one with a suitable \textit{capacity}
+for our training data\cite{Vapnik99Stats}. This capacity can be seen as the complexity of the function, in the sense that a highly
+complex function (e.g. high-degree polynomial) should not be used to model linearly correlated data.
+
+The discriminator for an SVM is based on hyperplanes
+\begin{equation}
+	h(\vec{x}) = \vec{wx} + b
+\end{equation}
+
+corresponding to the decision function:
+\begin{equation}
+f(\vec{x}) = \text{sign}(\vec{wx} + b)
+\end{equation}
+
+Note that the class labels for a typical SVM are either $-1$ or $1$.
+The optimal hyperplane is defined as the hyperplane with the maximum separation
+between two classes, such that the Euclidean distances (or margins) between the closest examples of each class
+to the hyperplane are maximised. This optimal solution also has the lowest capacity.
+
+In order to make this linear classifier non-linear, we can introduce \textbf{basis functions} $\phi_i$\cite{Holden18}
+
+\begin{align}
+\begin{split}
+	\vec{\Phi}^T(\vec{x}) &= 
+	\begin{bmatrix}
+	\phi_1(\vec{x})\ \phi_2(\vec{x}) \dots \phi_k(\vec{x})
+	\end{bmatrix}\\
+	h(\vec{x}) &= \sigma (\vec{w}^T\vec{\Phi}(\vec{x}) + b)
+\end{split}
+\end{align}
+
+These basis functions can then be transformed into kernels $K(\vec{x}_i,\vec{x})$:
+
+\begin{align}
+\begin{split}
+	h(\vec{x}) &= \text{sign}(b + \vec{w}^T\vec{\Phi}(\vec{x}))\\
+	&=\text{sign}(b + \sum_{i=1}^m \alpha_iy_i\vec{\Phi}^T(\vec{x}_i)\vec{\Phi}(\vec{x}))\\
+	&=\text{sign}(b + \sum_{i=1}^m \alpha_iy_i K(\vec{x}_i,\vec{x}))
+\end{split}
+\end{align}
+where $m$ is the total number of training examples, and $\vec{w} = \sum_{i=1}^m \alpha_iy_i\vec{\Phi}(\vec{x}_i)$
+arises from solving
+the constrained optimization problem:\\
+
+\noindent Minimise
+\begin{equation}
+\frac{1}{2}||\vec{w}||^2 + C \sum_{i=1}^m \xi_i
+\end{equation}
+such that
+\begin{equation}
+y_if(\vec{x}_i) >= 1-\xi_i\ \text{and\ } \xi_i >= 0\ \text{for\ } i = 1,...,m
+\end{equation}
+by solving the Lagrangian
+\begin{equation}
+\begin{split}
+L(\vec{w}, b, \vec{\xi}, \vec{\alpha}, \vec{\lambda}) &= \frac{1}{2}||\vec{w}||^2 + C \sum_{i=1}^m \xi_i\\
+&\quad - \sum_i\alpha_i(y_if(\vec{x}_i) + \xi_i - 1) - \sum_i\lambda_i\xi_i
+\end{split}
+\end{equation}
+where minimizing $\frac{1}{2}||\vec{w}||^2$ is equivalent to maximizing margins, $\vec{\xi}$ is the measurement
+of error(misclassification) and
+$C \sum_{i=1}^m \xi_i$ is minimised for minimal error for some hyperparameter $C$\footnote{The exact methods for solving this
+optimization problem are beyond the scope of this project and will not be discussed}.
+
+The two most common kernel functions are the Polynomial Function
+\begin{equation}
+	K_{cd}(\vec{x},\vec{x}') = (c + \vec{x}^T\vec{x}')^d
+\end{equation}
+where $c$ and $d$ are hyperparameters, and the Radial Basis Function (RBF)
+\begin{equation}
+	K_{\sigma^2}(\vec{x},\vec{x}') = e^{-\frac{1}{2\sigma^2}||\vec{x}-\vec{x}'||^2}
+\end{equation}
+where $\sigma$ is a hyperparameter. We will be using the RBF kernel for sentiment classification.
+
+\subsection{Naive Bayes}
 \label{sec:introNB}
 
+When tackling a complex learning problem, it is good practice to start by using
+a simple model. A Naive Bayes (NB) model is an application of
+Bayes' theorem for classification based on conditional probability, 
+with the `naive' assumption that the random variables
+constituting features are \textbf{independent}. While this assumption isn't completely valid for
+most ML problems, it allows us to use an easily built model that often produces
+good results regardless of dependent features.
 
-\section{Financial Markets}
-\label{sec:introFin}
+The key idea of NB is to classify an example 
+\begin{equation}
+\vec{x} = [x_1\ x_2\ ...\ x_n]
+\end{equation}
+as a class 
+\begin{equation}
+C_k \in \{C_1, C_2, ..., C_K\}
+\end{equation}
+by choosing the class $C_k$ representing by
+\begin{equation}
+\Pr(C_k | x_1\ x_2 ...\ x_n)
+\end{equation}
+which is the probability
+that an example is of class $C_k$ conditioned on its features, which are assumed to be independent
+\footnote{Note that $K$ denotes the total number of possible classes}. By application of
+Bayes' theorem:
+\begin{equation}
+\Pr(C_k | \vec{x}) = \frac{\Pr(C_k)\Pr(\vec{x}|C_k)}{\Pr(\vec{x})}
+\end{equation}
+In practice, we are only concerned with the numerator, since $\Pr(\vec{x})$ is not dependent
+on the class $C_k$. $\Pr(C_k)\Pr(\vec{x}|C_k)$ is equivalent to $\Pr(\vec{x}\ C_k)$, and thus:
+\begin{align}
+\begin{split}
+\Pr(\vec{x}\ C_k) &= \Pr(x_1\ x_2\ ...\ x_n\ C_k)\\
+&= \Pr(x_1 | x_2\ ...\ x_n\ C_k)\Pr(x_2\ ...\ x_n\ C_k)\\
+&= \Pr(x_1 | x_2\ ...\ x_n\ C_k)\Pr(x_2 | x_3\ ...\ x_n\ C_k)\Pr(x_3\ ...\ x_n\ C_k)\\
+& \quad\ \vdots\\
+&= \Pr(x_1 | x_2\ ...\ x_n\ C_k)\Pr(x_2 | x_3\ ...\ x_n\ C_k)\ ...\ \Pr(x_n\ C_k)\\
+&= \Pr(x_1 | x_2\ ...\ x_n\ C_k)\Pr(x_2 | x_3\ ...\ x_n\ C_k)\ ...\ \Pr(x_n | C_k)\Pr(C_k)
+\end{split}
+\end{align}
 
-\section{Feature Extraction}
-\label{sec:introFeat}
+Since we made the assumption that each feature is independent
+
+\begin{equation}
+\Pr(x_1 | x_2\ ...\ x_n\ C_k)\Pr(x_2 | x_3\ ...\ x_n\ C_k)\ ...\ \Pr(x_n | C_k)\Pr(C_k)
+= \Pr(C_k)\prod_{i=1}^n \Pr(x_i | C_k)
+\end{equation}
+
+Our classifier's output is then $h = C_k$ for the class satisfying
+
+\begin{equation}
+\argmax_k\quad \Pr(C_k)\prod_{i=1}^n \Pr(x_i | C_k)
+\end{equation}
+
+The probability $\Pr(C_k)$ can estimated by counting
+the number of training examples in each class:
+\begin{equation}
+\Pr(C_k) \approx \frac{\text{count}(y = C_k)}{\text{count}(y)}
+\end{equation}
+
+The types of NB classifiers, such as Gaussian Naive Bayes and Multinomial Naive Bayes,
+differ in the assumed distributions of $\Pr(x_i | C_k)$. 
+
+For Gaussian NB, the likelihood of a feature is assumed to be Gaussian:
+\begin{equation}
+	\Pr(x_i | C_k) \approx \frac{1}{\sqrt{2\pi\sigma_{C_k}^2}} \exp\bigg(-\frac{(x_i - \mu_{C_k})^2}{2\sigma_{C_k}^2}\bigg)
+\end{equation}
+
+Similarly, for Multinomial NB, the likelihood of a feature is assumed to be Multinomial. This is used
+for when the features are simply counts of distinct events. The 
+conditional probability is estimated\cite{Manning08}:
+\begin{equation}
+	\Pr(x_i | C_k) \approx \frac{1 + \sum_j^n x_i^j}{1 + \sum_m^n \sum_j^n x_m^j} \qquad \forall j.\ y^j=C_k
+\end{equation}
+where the addition of 1 to both the numerator and denominator is known as Laplace smoothing, or add-one smoothing.
+This is to prevent the overall probability for an example belonging to a class being 0 if one or more features had 
+never been seen for examples of the class.
+
+A further optimization to combat decimal underflow is to instead calculate the $\log$ of this conditional probability,
+since $\log$ is a monotonically increasing function and no probability for any class should $= 0$.
+\begin{align}
+&\argmax_k\quad \Pr(C_k)\prod_{i=1}^n \Pr(x_i | C_k)\\
+&=\argmax_k\quad \log\Big(\Pr(C_k)\prod_{i=1}^n \Pr(x_i | C_k)\Big)\\
+&= \argmax_k\quad \log\big(\Pr(C_k)\big) + \sum_{i=1}^n \log\big(\Pr(x_i | C_k)\big)
+\end{align}
+
+\subsection{Rejected Approach}
+\label{sec:prepRej}
+
+As an initial approach to the sentiment analysis problem, \textbf{semi-supervised learning} was attempted
+on a large Twitter dataset, as a possible alternative to supervised learning. This meant a much larger dataset
+was used, with only a small subset of the data being labelled. The classifier was an iterative application
+of an SVM on the labelled dataset, where it would find the unlabelled examples that were clearly
+separated by the decision boundary and assign the predicted label to those examples. The training process
+was then re-run with the newly autonomously labelled examples in the training set, until all examples
+were eventually labelled by the SVM. This process is known as \textbf{Label Spreading}.
+
+\cref{sec:semi} gives an overview of the implementation of this model, and the reasons why it was
+ultimately scrapped.
 
 \section{Requirements Analysis}
 \label{sec:introReq}
+Having studied the basics of Recurrent Neural Networks, Support Vector Machines, and
+Naive Bayes, the project requirements were decided. The aim of the project is to
+perform sentiment analysis on Twitter news headlines, and use the results as well as financial time-series data
+to predict stock market prices with an LSTM. This splits the project into two main logical groups --
+the sentiment analysis and the stock price prediction.
+
+\subsection*{Sentiment Analysis}
+
+The most important goal of the Sentiment Analysis part of the project is to
+have a high enough accuracy that the output is useful for the stock price
+prediction. In terms of functional requirements, several classifiers must be
+implemented, and from those I will select the most suitable one for use
+with the LSTM. These classifiers will be the Support Vector Machine,
+Multinomial Naive Bayes, and Gaussian Naive Bayes. 
+
+Because of the need for Twitter data that matches both the time period and
+subject matter of the financial data, I will build a data scraping and processing
+system to gather my dataset. I will also be experimenting
+with several feature extraction methods from the Twitter dataset, which are
+Doc2Vec\cite{Le14} and Bag of Words.
+
+
+\subsection*{Stock Price Prediction}
+
+The ultimate goal of the project is to be able to predict stock
+prices more accurately than a random agent is able to. This accuracy
+is a performance measurement of the LSTM model used for predicting
+stock prices. The functional requirements for the price prediction
+portion of the project are that the sentiment classification output
+must combine with the financial data, a feature extractor for financial
+indicators must be built, and that the LSTM must function properly, with
+well-tuned hyperparameters.
+
+A summary of the requirements for this project is shown in \cref{table:req}.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{llll}
+\toprule
+\textbf{Requirement}                                                                               & \textbf{Priority} & \textbf{Risk} & \textbf{Difficulty} \\ \midrule
+Multinomial Naive Bayes                                                                                     & Medium            & Medium        & Medium              \\ [0.5ex]
+Gaussian Naive Bayes                                                                                        & Medium            & Medium        & Medium              \\ [0.5ex]
+Support Vector Machine                                                                                                & High              & Medium        & Low                 \\ [0.5ex]
+Twitter data processing                                                                            & High              & Medium        & Medium              \\ [0.5ex]
+\begin{tabular}[c]{@{}l@{}}Compare and evaluate Twitter feature \\[-0.5ex] extraction methods\end{tabular} & Low               & Low           & Medium              \\ [2ex]
+\begin{tabular}[c]{@{}l@{}}Compare and evaluate sentiment \\[-0.5ex] analysis models\end{tabular}          & High              & Low           & Medium              \\ [2ex]
+\begin{tabular}[c]{@{}l@{}}Combine sentiment classifier output\\[-0.5ex] and financial data\end{tabular}   & High              & Medium        & Medium              \\ [2ex]
+Feature extractor for financial data                                                               & Medium            & Low           & Medium              \\ [0.5ex]
+Long Short-Term Memory Network                                                                                               & High              & High          & High                \\ [0.5ex]
+Hyperparameter tuning                                                                              & Medium            & Low           & Medium              \\ [0.5ex] \bottomrule
+\end{tabular}
+\caption{Goals of the project}
+\label{table:req}
+\end{table}
 
 
 \section{Choice of Tools}
 \label{sec:introTool}
 
+\subsection{Programming Language}
+
+For machine learning projects, it is quite standard to use \texttt{Python},
+because of its support for useful ML libraries (such as Tensorflow, Keras, Theano), its
+ease of use and readability, and relaxed type system. Though the language is not as
+fast as other languages such as \texttt{Java} and \texttt{C++}, many of its
+powerful libraries use \texttt{CPython}, which is a reference implementation
+and interpreter of \texttt{Python} in \texttt{C}.
+This allows these libraries to exploit the performance of \texttt{C} while maintaining
+the benefits of \texttt{Python}. I have chosen to use \texttt{Python} as the main
+language for my project, while also using \texttt{MATLAB} for some trivial
+plotting and mathematical tasks.
+
+\subsection{Libraries}
+\label{sec:introLib}
+
+The main third party libraries used are shown in \cref{table:libs}. Tensorflow\footnote{https://www.tensorflow.org/}
+and Scikit-learn\footnote{http://scikit-learn.org/} are
+of particular importance. Both libraries are well-documented and widely used in industry, with the 
+latter often being used for prototyping. GetOldTweets\footnote{https://github.com/Jefferson-Henrique/GetOldTweets-python}
+is not an official library, but is an open-source
+project for scraping Twitter searches to retrieve Tweets that are older than allowed by the official Twitter 
+API's query limit.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{llll}
+\toprule
+\textbf{Library}                        & \textbf{Version} & \textbf{Use} & \textbf{License} \\ \midrule
+Tensorflow                             & 1.5.0            & Building LSTM        & Apache 2.0 License              \\ [0.5ex]
+Scikit-learn                           & 0.19.0           & Using SVM        & BSD-new License              \\ [0.5ex]
+Numpy                                  & 1.14.0           & Efficient array manipulation        & BSD-new License              \\ [0.5ex]
+Scipy                                  & 0.19.1           & Probability functions for NB        & BSD-new License              \\ [0.5ex]
+Pandas                                 & 0.20.3           & Data representation and manipulation        & BSD-new License              \\ [0.5ex]
+GetOldTweets                           & Unknown          & Twitter web scraping        & MIT License              \\ [0.5ex] \bottomrule
+\end{tabular}
+\caption{Main libraries used in this project}
+\label{table:libs}
+\end{table}
+
+\subsection{Development and Testing}
+
+Development was carried out on my personal laptop, which runs Windows 10. Because of its relatively 
+powerful graphics card (Nvidia GTX 1060), it was also capable of training and testing the LSTM
+models.
+
+For revision control, I used \texttt{git}, the revision control system
+that is almost ubiquitous in industry. I created and synchronised repositories on
+GitHub\footnote{https://github.com, a free and popular \texttt{git} repository hosting service}, 
+for both my project and the dissertation write-up. This was used not only for
+planning and tracking progress, but also as a back-up tool. 
+
 
 \section{Starting Point}
 \label{sec:introStart}
 
+The Computer Science Tripos has several courses that proved useful for my project.
+These are outlined in \cref{table:courses}. In particular, Machine Learning and
+Bayesian Inference provided me with the base knowledge required for understanding
+SVMs, Naive Bayes, and Neural Networks -- however, personal study was required to
+learn about RNNs and LSTMs, as well as different hyperparameter tuning techniques.
 
-\section{Implementation Approach}
+My knowledge of \texttt{Python} prior to this project was intermediate, having used it
+only as a minor part of a prior internship. I had no experience with Tensorflow
+or other Deep Learning libraries. This meant I had to learn the design concepts
+behind Tensorflow, which is to construct mathematical operations for NNs as
+computational graphs operating on tensors. 
+
+\begin{table}[H]
+\centering
+\begin{tabular}{llll}
+\toprule
+\textbf{Course}                              & \textbf{Application} \\ \midrule
+Machine Learning and Bayesian Inference      &  Neural Networks, SVM                    \\
+Natural Language Processing                  &  Twitter feature extraction                    \\
+LaTeX and MATLAB                             &  Plotting and simple SVM model prototype       \\
+Mathematical Methods for CS    &  Understanding probability functions            \\
+Software Engineering                         &  Iterative and incremental development model                    \\\bottomrule
+\end{tabular}
+\caption{Tripos courses applicable to this project}
+\label{table:courses}
+\end{table}
+
+\section{Software Engineering and Approach}
 \label{sec:introImpl}
 
+For a project of this scale, it is imperative to plan the different stages of
+development, and to compartmentalise the project. As was already outlined in \cref{sec:introReq},
+the project was split into two main sections: sentiment analysis and stock price prediction. An
+overview schematic of the project's components are show in \cref{fig:overview}.
 
-\section{Software Engineering Techniques}
-\label{sec:introSoft}
+\begin{figure}[H]
+\centering
+\vspace{10pt}
+\includegraphics[width=\textwidth]{Proj_Overview.png}
+\caption{Overview of project components}
+\label{fig:overview}
+\end{figure}
+
+The \textbf{Iterative and Incremental Development Model} was adopted for this project.
+The idea was to first build a `walking skeleton', an runnable end-to-end system that
+has all of the essential components of the final end-product, though the components
+may simply be placeholders\cite{Cockburn04}. These components can then be properly
+implemented at a later date, with the project's architecture already in place.
+These components were then iteratively tuned and improved.
+
+The list of components to complete were as follows, ranked by implementation order:
+
+\begin{enumerate}
+\item
+Collect Twitter and financial data
+
+\item
+Build Twitter data processing system
+
+\item
+Manually label Twitter dataset
+
+\item
+Implement sentiment feature extractors
+
+\item
+Build Gaussian and Multinomial Naive Bayes
+
+\item
+Build SVM
+
+\item
+Evaluate and pick the best-performing classifier
+
+\item
+Implement financial feature extractor
+
+\item
+Build LSTM
+\end{enumerate}
+The components described in steps 4-9 were then iteratively refined after initial completion.
 
 
 \section{Summary}
-\label{sec:introSumm}
+\label{sec:prepSumm}
 
+In this chapter, I have discussed the relevant theory that had to be understood, the planning
+that occurred, before implementation was started. I gave an introduction to the concepts
+behind the machine learning models I will be implementing, and outlined the goals and
+key development strategies. I have also given an overview of the tools and libraries I
+will be using.
+
+The next chapter will detail the implementation of the project, showing how the goals and
+plans outlined in this chapter were achieved.
 
 \chapter{Implementation}
+\label{sec:imp}
+
+This chapter details the implementation of the project, and how the goals and
+design principles outlined in the previous chapter were accomplished. The project proved
+to be a hefty undertaking, with the codebase totaling just over 6000 lines. I will be
+presenting the sentiment analysis portion of the project first, before moving into price
+prediction section. This was the order in which I implemented the project, as outlined
+in the previous chapter, and provides a logical flow between the components.
 
 \section{Sentiment Analysis}
+\label{sec:impSenti}
+This section first gives an overview of the initial rejected approaches to the
+learning problem.
+
+The rest of the section is discussed in the logical order of data flowing through the system --
+we discuss the collection of data and the pipelining process, before
+moving onto feature extraction, and finally the different sentiment classifiers.
+
+\subsection{Rejected Approach}
+\label{sec:impFailed}
+
+This section details the initial approach to the sentiment analysis problem
+that was ultimately scrapped.
+
+\subsubsection{Semi-Supervised Learning}
+\label{sec:semi}
+My first experimental forays into the sentiment analysis problem was to
+simply acquire as much relevant data as I could, and manually label a small subset
+to feed into a semi-supervised learning model. The initial reasons behind this decision
+were that there was a large abundance of official Twitter accounts of large news
+agencies, and that there may be a sufficiently large number of samples for a
+semi-supervised Deep Learning model, such as a \textbf{Hybrid Deep Belief Network}\cite{Zhou14}.
+
+My approach to examining potential solutions to a learning problem is to first
+use a simple model in order to gain insight on whether the problem can feasibly
+be solved. Following this ethos, I used Scikit-Learn's semi-supervised learning module's
+label spreading implementation to test the feasibility of using a semi-supervised learning
+method for this dataset. This module uses the label spreading method mentioned in
+\cref{sec:prepRej}, combined with a standard SVM.
+After manually labelling around 2000 tweets, out of a total of
+around 500,000 tweets, I separated the labelled dataset into an 80:20 split for train:test,
+a standard ratio for partitioning data. The labelled 80% training set was then combined
+with the rest of the unlabelled dataset and used to train the semi-supervised SVM. The
+trained model was then evaluated on the separated labelled test dataset. 
+
+The results gave very little confidence in moving forward with this technique, as the accuracy 
+for sentiment classification was 54%. Considering the output of the sentiment classifier is
+to be fed into the LSTM network as an input, it was imperative that the output be mostly correct,
+in order to ensure that inputs to the LSTM are kept as noise-free as possible. Thus, I decided to
+pursue a supervised learning approach to the sentiment analysis problem.
 
 \subsection{Data}
+\label{sec:impSentiData}
+
+Before collecting the data, key decisions were made regarding sources (Twitter accounts)
+and time-frame. The original plan was to collect a large amount of data (in the magnitude
+of 500,000 tweets), and to label a small subset of these tweets and feed it into a
+semi-supervised learning model. After experimenting with this technique, I quickly realized
+that it may be more effective to be selective about the data I was collecting in order to
+have a dataset that both was small enough to manually label, and also only provided relevant 
+information to the price prediction model. 
+
+I settled on using tweets from the official Reuters Twitter account\footnote{\url{https://twitter.com/Reuters}}.
+From my experiment with semi-supervised learning, I quickly realized that there was a great deal of redundancy
+when sampling from many news agencies, as any important news story is often broadcasted by most agencies.
+I chose Reuters because it is a leading provider of financial news, and
+most news regarding specific companies that were registered on the stock exchange of
+study, NASDAQ, were labelled with the corresponding ticker symbol\footnote{A ticker symbol is the identifier given to a company on
+a stock exchange}. In order to account for irregularities in tweet styles,
+I also performed a search for mentions of the company's name in each tweet.
+
+\subsubsection{Initial Approaches}
+My first approach to acquiring the Twitter dataset was to try to find labelled datasets from other studies
+that have been conducted regarding Twitter sentiment analysis on financial data. After failing to find any that 
+were sufficiently related to the aims of my project, I moved to collect the data through Twitter's official web API.
+However, after discovering that the API calls for retrieving tweets that are older than a week were locked
+behind various paywalls\footnote{\url{https://developer.twitter.com/en/docs/tweets/search/overview}}, I decided to find a way around this issue.
 
 \subsubsection{Crawling}
+\label{sec:impCrawl}
+
+As was mentioned in \cref{sec:introLib}, I used the GetOldTweets library for web scraping the relevant Twitter page.
+The aforementioned limitation on historical tweet retrieval prevented me from acquiring data that matched the 
+full time period of my financial data, as my financial dataset required a sufficiently large number of samples 
+for a Deep Learning model.
+
+This library generates a search query URL on Twitter, which specifies the username, time frame, language,
+search query, and maximum number of returned tweets. An HTTP GET request is then sent to the search URL,
+and the JSON-formatted response of the search results in returned. This response only contains a page
+worth of results, so the process is repeated until all results are gathered. This response is then parsed and
+converted to a custom Tweet object, and returned from the original function call.
 
 \subsubsection{Pipeline}
+\label{sec:impPipeline}
+
 
 \subsection{Features}
+\label{sec:impSentiFeat}
 
 \subsection{Multinomial Naive Bayes}
+\label{sec:impMNB}
 
 \subsection{Gaussian Naive Bayes}
+\label{sec:impGNB}
 
 \subsection{Support Vector Machine}
+\label{sec:impSVM}
 
 \section{Price Prediction}
+\label{sec:impFin}
 
 \subsection{Data}
+\label{sec:impFinData}
+
+\subsection{Features}
+\label{sec:impFinFeat}
 
 \subsection{Long Short-Term Memory}
 \label{sec:ImplLSTM}
