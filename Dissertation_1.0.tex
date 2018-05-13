@@ -9,8 +9,11 @@
 \usepackage{amsmath}
 \usepackage{tikz}
 \usepackage{float}
+\usepackage{todonotes}
 \usepackage{cleveref}
 \usepackage{booktabs}
+\usepackage{mathtools}
+
 
 \edef\restoreparindent{\parindent=\the\parindent\relax}
 \usepackage{parskip}
@@ -103,8 +106,8 @@ Gaussian and Multinomial Naive Bayes Classifiers, and used the
 Scikit-Learn library for implementing Multi-Class Support Vector Machines and
 Semi-Supervised Support Vector Machines for sentiment analysis. Finally, I built
 a Long Short-Term Memory Recursive Neural Network for stock price prediction. The techniques
-proposed for predicting stock market prices have resulted in statistically significant results,
-and may benefit financial and machine learning research in this field.
+proposed for predicting stock market prices have developed results that match, if not exceed,
+state-of-the-art accuracies, and can benefit financial and machine learning research in this field.
 
 \section*{Special Difficulties}
 
@@ -130,14 +133,14 @@ extent for a comparable purpose.
 
 \tableofcontents
 
-\listoffigures
+{\listoffigures \let\cleardoublepage\clearpage \listoftables}
 
 \newpage
 \section*{Acknowledgements}
 
 I would like to thank the following people for the help they have given me:
 
-TODO: COMPLETE AFTERWARDS
+\todo[inline]{TODO: COMPLETE AFTERWARDS}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % now for the chapters
@@ -147,40 +150,158 @@ TODO: COMPLETE AFTERWARDS
 \chapter{Introduction}
 
 \pagenumbering{arabic}
-TODO: Beginning Starting Intro
 
-This dissertation describes the implementation, fusion, and testing of several Machine Learning (ML)
-techniques for stock price prediction. Multinomial Naive Bayes, Gaussian Naive Bayes, and Multi Class
-Support Vector Machines, using different methods of feature extraction, were used to classify the
-sentiment of relevant Twitter posts of news headlines. The Long Short-Term Memory (LSTM) Recurrent 
-Neural Network (RNN) was used for predicting stock prices, utilizing both
-financial technical indicators and the output of the sentiment classifiers.
+This dissertation describes experimentation with several
+techniques for stock price prediction, and proposes a novel method for tackling this problem.
+The focus of the project is to combine machine learning-based sentiment analysis with deep learning-based 
+stock price prediction. For this purpose, I implemented several sentiment analysis classifiers,
+used different feature extraction techniques, and built a state of the art deep Long Short-Term Memory Network. 
+These components combine into the proposed stock price prediction system.
 
+\todo[inline]{TODO: talk about how successful the project was}
 
 \section{Motivation \& Aims}
 
-Under the Efficient Market Hypothesis, an efficient capital market fully reflects
+Machine learning is perhaps the most famous topic in Computer Science in the current decade.
+Being the focus of much media attention, and one of the most researched areas for the largest
+technology companies, it is in the somewhat unique position of having captivated both the
+public and the experts in the field. The underlying reasons for this are unsurprising --
+the ability for computers to perform at superhuman levels for tasks that were previously
+considered human specialities is bound to catch attention.
+
+Perhaps even more interesting is the ability for machine learning (more specifically
+deep learning) to perform
+admirably on tasks that were previously thought exceedingly difficult,
+even for humans. These tasks, such as near-instantaneous language translation\cite{Sutskever14}, and
+accurate medical diagnosis of difficult patients\cite{Litjens17, Lee17}, show not only the prospect of machine learning
+replacing human jobs, but also its application to new fields that were previously
+unaccessible. Stock price prediction is one of these new areas.
+
+Stock price prediction presents a formidable machine learning problem on several levels.
+The signal to noise ratio inherent to any stock price dataset renders the task difficult
+for many traditional learning models. Moreover, it is debated whether stock prices are
+even predictable -- under the Efficient Market Hypothesis, an efficient capital market fully reflects
 all relevant information in determining security prices \cite{Malkiel89}. Since all past prices and
-information are available to the market, it follows that correct predictions, if possible, will be immediately
-taken advantage of, and the resulting market adjustment quickly nullifies any possible advantage. Thus,
-it follows that an efficient market is unpredictable, and behaves in the manner of a Random Walk.
+information are available to the market, correct predictions, if possible, should immediately be
+taken advantage of, and the resulting market adjustment quickly nullifies any possible advantage.
+It logically follows that an efficient market is arguably unpredictable, and behaves in the manner of a Random Walk.
 
 However, several factors contribute to potential inefficiency in practical markets --
 there usually exists some latency in market information availability and absorption, varying liquidity levels
 of different commodities and equities, different levels of information availability, and countless other
-real-life factors. Thus, it is argued that there exists a window for prediction. [Cite several of these studies]
+real-life factors. Thus, it is argued that there exists a window for prediction\cite{Buffett10, Chan03, Basu77}.
 
-The wealth of available data regarding financial markets makes it a prime target for Machine Learning.
+The rise of deep learning techniques has allowed models to learn complicated and highly-nonlinear 
+patterns. Most relevant to this project is the advent of Recurrent Neural Networks (RNNs) in learning tasks, from
+Google Duplex's most recent automated phone calls\footnote{\url{https://blog.google/products/assistant/io18/}}
+powered by Deepmind's Wavenet\cite{Oord16}, to optical character recognition\cite{Breuel13}, to
+robotic surgery control\cite{Mayer08}, to time-series prediction\cite{Malhotra15, Lipton15}, and many more.
+The inherent ability of RNNs to handle time-series data and learn long and short term dependencies makes
+this architecture a prime candidate for stock price prediction.
 
+The use of Twitter as a source of spreading news and information has also seen increasing importance in the past years,
+most notably shown by how President Donald Trump regularly releases important news regarding the United States 
+on his Twitter page. Tweets\footnote{Tweets are the name given to Twitter posts} from News Agencies are often
+a good source of quick information, as the most relevant headlines are often posted. This essentially creates
+a filter for good content that we are able to use for sentiment analysis.
 
+I will be using sentiment analysis of Tweets from financial news agencies and technical analysis of stock
+price data to feed into a Deep Long Short-Term Memory Network to predict stock prices.
+By applying machine learning techniques in a novel approach to this learning problem,
+I will be contributing a new perspective on the optimal ways of finding the solution
+that is so desired in the Finance industry. Moreover, the unique noisy nature of this
+dataset makes it an inherently difficult machine learning problem, and one that is inherently
+difficult even for humans.
 
 \section{Challenges}
+\label{sec:introChallenges}
 
+The challenges posed by the inherent noisy nature of stock price data renders this problem
+high risk -- there is a fair chance that approaches may not even succeed. Moreover, the
+sentiment analysis problem also poses risk -- I must be able to either find a relevant labelled dataset,
+or gather my own and manually label it. Unfortunately, such a dataset was unable to be found.
 
+Manual labelling restricts the possible approaches that
+can be taken, since the dataset will not be large enough for a deep learning approach. This topic
+is discussed in detail in \cref{sec:prepRej} and \cref{sec:impFailed}.
+Because of the need for sentiment and financial data with matching time periods, the limitation of manual labelling
+also restricts the number of stocks and financial markets that can be explored in this project. Therefore there
+is also risk in selecting an appropriate financial dataset.
+
+The financial dataset was collected using a Bloomberg Terminal. This is a program that is ubiquitous
+in the finance industry, for collecting stock or commodity prices, statistical analysis, viewing breaking news,
+gathering historical data, and much more. Collecting data required that I learn how to use the software --
+though this should be trivial for a Computer Science student, the number of features and abundance of
+financial lingo makes this task significantly harder than was expected.
+
+Choosing the correct machine learning and deep learning models can also be difficult. Since
+there are an abundance of machine learning models, and it is critical that I understand the theories and
+properties of each in order to gauge their suitability for this task.
 
 \section{Related Work}
 
+The papers introducing Long Short-Term Memory Networks and Deep Long Short-Term
+Memory Networks are discussed below.
 
+There are few publications regarding the combination of sentiment analysis with financial data to predict stock
+prices, though there is literature on each approach to the stock price prediction problem.
+It is also important to note that papers on each topic may be untrustworthy or dubious, due to the nature of
+the learning problem and its financial appeal. There are also few papers that attempt to predict intra-day
+prices, rather than end-of-day, due to the larger amount of noise inherent to intra-day data.
+
+\subsection{Recurrent Neural Networks}
+
+The paper by Hochreiter et al. from 1997 introduced Long Short-Term Memory (LSTM) Networks
+as a solution to the vanishing/exploding gradient problem in normal Recurrent Neural Networks (RNNs)\cite{Hochreiter97}.
+This was a breakthrough that allowed RNNs to be used in practical applications, such as time series
+prediction. The LSTM was revised by Gers et al. in 1999, introducing the forget gate, which tackled
+the problem of catastrophic failure in the case of long serial inputs\cite{Gers99}.
+In 2013, Graves et al. introduced Deep LSTM Networks, which was the concept of
+stacking LSTM in hidden layers, similar to the architecture of regular Deep Neural Networks. This provided
+an extraordinary boost to the learning abilities of the network, as deep networks are able to learn much
+more complex and highly non-linear patterns\cite{Graves13}.
+
+\subsection{Sentiment Analysis for Price Prediction}
+
+The first paper relating sentiment and stock prices is by Wuthrich et al. in 1998\cite{Wuthrich1998}. The study
+was conducted on whether negative sentiment in the news would affect the various stock market indices around the world,
+sampled on a daily interval.
+The study used a carefully curated collection of relevant phrases, such as `dollar falter' and `technology
+rebound strongly'. The number of overall occurrences of these phrases was counted, and the result was used
+in a system that generates `probabilistic rules'.
+
+A paper published by Tetlock et al. in 2008\cite{Tetlock08} studied whether negative sentiment in the news would affect 
+a company's earnings as well as its stock price on a daily interval. In this case, sentiment was measured as the frequency 
+of negative words in a news article, according to the Harvard-IV-4 
+dictionary\footnote{\url{http://www.wjh.harvard.edu/~inquirer/homecat.htm}}.
+The method for modelling was linear regression, a standard method in economics. This was one of the first studies to try
+to actually predict stock prices, rather than a simple rise or fall prediction.
+
+The first paper to use Twitter as its data source is by Bollen and Huina from 2010\cite{Bollen11}.
+The study used OpinionFinder\footnote{\url{http://mpqa.cs.pitt.edu/opinionfinder/}} and Google's Profile of Mood States
+for feature extraction, which simply outputs whether a Tweet is `Calm, Alert, Sure, Vital, Kind, [or] Happy'. 
+This is fed into a Self-Organizing Fuzzy Neural Network and a Granger causality analysis calculation\footnote{A statistical test for determining
+whether one time series forecasts another} to
+predict stock prices on a daily interval.
+
+\subsection{Financial Data for Price Prediction}
+
+There are a large number of papers that focus on predicting stock prices using technical indicators of
+financial data using deep learning. Most of these are based on data sampled on a daily interval.
+The first instance was in 1988 by White, who used a Multilayer Perceptron (MLP) with one hidden layer.
+However, the end result was a failure\cite{White98}.
+
+A more recent paper by Bao et al. from 2017 uses LSTM Networks and Stacked Autoencoders\footnote{Stacked autoencoders are an unsupervised deep learning
+algorithm for efficient encodings} (SAE)\cite{Bao17}.
+This study used Wavelet transforms to de-noise financial data, with SAEs being used to
+generate high-level features from the de-noised data. These features were then fed into a deep LSTM network. This method
+was used to predict the prices of several stock market indices on a daily interval.
+
+\subsection{Sentiment Analysis Combined with Financial Data}
+
+One of the few papers that presents the combination of sentiment analysis and financial data to predict stock
+prices is by Zhao et al.\cite{Zhai07}. The paper presents a Support Vector Machine model that uses Bag of Words
+and technical financial indicators to predict the rise or fall of a single stock on a daily interval.
 
 \chapter{Preparation}
 \label{sec:prep}
@@ -232,6 +353,7 @@ samples $\vec{x'}$. We can then run accuracy measurements and goodness-of-fit te
 the resulting outputs, given we know the original labels $y'$.
 
 \subsection{Artificial Neurons}
+\label{sec:prepNeurons}
 
 A neural network is a network of artificial neurons that each takes an input $\vec{x}$,
 and runs a linear combination of the input feature vector $\vec{x}$, weights $\vec{w}$, and a bias $b$,
@@ -869,7 +991,7 @@ where the addition of 1 to both the numerator and denominator is known as Laplac
 This is to prevent the overall probability for an example belonging to a class being 0 if one or more features had 
 never been seen for examples of the class.
 
-A further optimization to combat decimal underflow is to instead calculate the $\log$ of this conditional probability,
+A further optimization to combat decimal underflow is to instead calculate the logarithm of this conditional probability,
 since $\log$ is a monotonically increasing function and no probability for any class should $= 0$.
 \begin{align}
 &\argmax_k\quad \Pr(C_k)\prod_{i=1}^n \Pr(x_i | C_k)\\
@@ -985,7 +1107,9 @@ Tensorflow                             & 1.5.0            & Building LSTM       
 Scikit-learn                           & 0.19.0           & Using SVM        & BSD-new License              \\ [0.5ex]
 Numpy                                  & 1.14.0           & Efficient array manipulation        & BSD-new License              \\ [0.5ex]
 Scipy                                  & 0.19.1           & Probability functions for NB        & BSD-new License              \\ [0.5ex]
-Pandas                                 & 0.20.3           & Data representation and manipulation        & BSD-new License              \\ [0.5ex]
+Pandas                                 & 0.20.3           & Data manipulation        & BSD-new License              \\ [0.5ex]
+Gensim								   & 2.3.0			  &	\texttt{Doc2vec} feature extraction			& GNU LGPLv2.1 license\\ [0.5ex]
+Matplotlib							   & 2.0.2			  & Graph plotting 				& Matplotlib License	\\ [0.5ex]
 GetOldTweets                           & Unknown          & Twitter web scraping        & MIT License              \\ [0.5ex] \bottomrule
 \end{tabular}
 \caption{Main libraries used in this project}
@@ -1027,9 +1151,9 @@ computational graphs operating on tensors.
 \textbf{Course}                              & \textbf{Application} \\ \midrule
 Machine Learning and Bayesian Inference      &  Neural Networks, SVM                    \\
 Natural Language Processing                  &  Twitter feature extraction                    \\
-LaTeX and MATLAB                             &  Plotting and simple SVM model prototype       \\
+LaTeX and MATLAB                             &  Plotting       \\
 Mathematical Methods for CS    &  Understanding probability functions            \\
-Software Engineering                         &  Iterative and incremental development model                    \\\bottomrule
+Software Engineering                         &  Iterative development model                    \\\bottomrule
 \end{tabular}
 \caption{Tripos courses applicable to this project}
 \label{table:courses}
@@ -1107,19 +1231,23 @@ plans outlined in this chapter were achieved.
 \label{sec:imp}
 
 This chapter details the implementation of the project, and how the goals and
-design principles outlined in the previous chapter were accomplished. The project proved
-to be a hefty undertaking, with the codebase totaling just over 6000 lines. I will be
+design principles outlined in the previous chapter were accomplished. I will be
 presenting the sentiment analysis portion of the project first, before moving into price
 prediction section. This was the order in which I implemented the project, as outlined
 in the previous chapter, and provides a logical flow between the components.
 
+\todo[inline]{TODO: find a place to fit this: Multinomial Naive Bayes, Gaussian Naive Bayes, and Multi Class
+Support Vector Machines, using different methods of feature extraction, were used to classify the
+sentiment of relevant Twitter posts of news headlines. The Long Short-Term Memory (LSTM) Recurrent 
+Neural Network (RNN) was used for predicting stock prices, utilizing both
+financial technical indicators and the output of the sentiment classifiers.}
+
 \section{Sentiment Analysis}
 \label{sec:impSenti}
 This section first gives an overview of the initial rejected approaches to the
-learning problem.
-
-The rest of the section is discussed in the logical order of data flowing through the system --
-we discuss the collection of data and the pipelining process, before
+learning problem. The rest of the section is discussed in the logical order of data flowing 
+through the system --
+we discuss the collection of data, before
 moving onto feature extraction, and finally the different sentiment classifiers.
 
 \subsection{Rejected Approach}
@@ -1143,9 +1271,9 @@ be solved. Following this ethos, I used Scikit-Learn's semi-supervised learning 
 label spreading implementation to test the feasibility of using a semi-supervised learning
 method for this dataset. This module uses the label spreading method mentioned in
 \cref{sec:prepRej}, combined with a standard SVM.
-After manually labelling around 2000 tweets, out of a total of
-around 500,000 tweets, I separated the labelled dataset into an 80:20 split for train:test,
-a standard ratio for partitioning data. The labelled 80% training set was then combined
+After manually labelling around 2000 tweets, out of
+approximately 500,000 tweets, I separated the labelled dataset into an 80:20 split for train:test,
+a standard ratio for partitioning data. The labelled 80\% training set was then combined
 with the rest of the unlabelled dataset and used to train the semi-supervised SVM. The
 trained model was then evaluated on the separated labelled test dataset. 
 
@@ -1158,22 +1286,19 @@ pursue a supervised learning approach to the sentiment analysis problem.
 \subsection{Data}
 \label{sec:impSentiData}
 
-Before collecting the data, key decisions were made regarding sources (Twitter accounts)
-and time-frame. The original plan was to collect a large amount of data (in the magnitude
-of 500,000 tweets), and to label a small subset of these tweets and feed it into a
-semi-supervised learning model. After experimenting with this technique, I quickly realized
-that it may be more effective to be selective about the data I was collecting in order to
-have a dataset that both was small enough to manually label, and also only provided relevant 
-information to the price prediction model. 
+After experimenting with semi-supervised learning, I quickly realized
+that it may be more effective to be selective about the data I was collecting. This ensures
+that I have a dataset that was small enough to manually label and further enforces that only relevant 
+information to the price prediction model should be used. 
 
 I settled on using tweets from the official Reuters Twitter account\footnote{\url{https://twitter.com/Reuters}}.
-From my experiment with semi-supervised learning, I quickly realized that there was a great deal of redundancy
+From reading through the semi-supervised dataset, I quickly realized that there was a great deal of redundancy
 when sampling from many news agencies, as any important news story is often broadcasted by most agencies.
 I chose Reuters because it is a leading provider of financial news, and
 most news regarding specific companies that were registered on the stock exchange of
 study, NASDAQ, were labelled with the corresponding ticker symbol\footnote{A ticker symbol is the identifier given to a company on
 a stock exchange}. In order to account for irregularities in tweet styles,
-I also performed a search for mentions of the company's name in each tweet.
+I also performed a search for mentions of the company's name in each tweet. This also 
 
 \subsubsection{Initial Approaches}
 My first approach to acquiring the Twitter dataset was to try to find labelled datasets from other studies
@@ -1196,33 +1321,252 @@ and the JSON-formatted response of the search results in returned. This response
 worth of results, so the process is repeated until all results are gathered. This response is then parsed and
 converted to a custom Tweet object, and returned from the original function call.
 
+\subsubsection{Labelling}
+\label{sec:impLabel}
+\todo[inline]{TODO: This section, discuss criteria for labelling pos/neg}
+
 \subsubsection{Pipeline}
 \label{sec:impPipeline}
 
+\todo[inline]{TODO: MAYBE SCRAP THIS SECTION}
+
+The pipelining process was designed around disk I/O. This means that when data travels through the pipeline,
+it is written to file at each stage, in order to ease debugging and increase transparency, but also to
+preempt scalability issues in future applications of the pipeline where the data may not fit entirely in memory.
+This is often the case for machine learning problems in industry, where dataset files can span terabytes
+\footnote{An example of a standard dataset of this size is the Google Books Ngrams dataset, which is 2.2 TB. 
+\url{https://aws.amazon.com/datasets/google-books-ngrams/}}.
+
+Another reason for basing the pipeline around file I/O is that this dataset required manual labelling.
+This means there is a specific stage of the pipeline where the user must open the required temporary
+file and manually comb through the Twitter data, before the next function can be run and the file
+be converted to the requisite datatype.
+
+The pipeline's goals between its stages are to:
 
 \subsection{Features}
 \label{sec:impSentiFeat}
+There are three main feature extraction systems that I used for the Twitter dataset. The first is
+a simple Bag of Words approach. This is the vector representation for word occurrence counts --
+we first build a vocabulary of words by parsing through the training dataset to find a list of all unique words,
+and assigning an index to each unique word. We then build feature vectors of $m$ length, where $m$ is the
+total number of unique words in the dataset. Then, for every word in the training example, we simply
+increment the value at the corresponding index for the word in the feature vector. This can intuitively
+be explained as a tally for each unique word in the example, with zeros in the dimensions where the
+corresponding word does not appear in the example. 
 
-\subsection{Multinomial Naive Bayes}
+\missingfigure[figheight=6cm]{TODO: BOW FIGURE}
+
+For cases where unique words may appear in the test/validation
+dataset that did not appear in the training set, we can either initially include an extra dimension in the feature
+vector for `other', but in the case of our models, since the training data does not include any examples featuring
+this word, the model will either not have trained to include it in its decision boundary, or unexpected
+behaviour may occur. Thus, it is better practice to simply omit new unique words when extracting features
+from the test/validation sets.
+
+The current state-of-the-art feature representation method for text is \texttt{doc2vec}\cite{Le14}.
+This method is a continuation of \texttt{word2vec}\cite{Mikolov13}. \texttt{Word2vec} is a method
+for vector representation of a word generated through unsupervised learning. The idea of this method
+is that words of similar semantic meaning are closer by Euclidian distance in the feature vector space than
+words that are not semantically related. \cref{fig:word2vec} shows this property. It also shows that logical vector relations 
+also follow from this property, in the sense that the feature vector for a word can be deconstructed as the
+combination of two or more feature vectors that are logically computed in the realm of semantic relations.
+The example shown in the figure is that $\vec{King}$ is to $\vec{Queen}$ what $\vec{Man}$ is to $\vec{Woman}$,
+and $\vec{King} - \vec{Man} + \vec{Woman} = \vec{Queen}$. This shows that
+logical combinations of words' semantic meanings are directly translated to addition and subtraction in
+the feature vector space.
+
+\begin{figure}[H]
+\centering
+\vspace{10pt}
+\includegraphics[width=\textwidth]{word2vec.png}
+\caption{Simplified \texttt{word2vec} representation of words}
+\label{fig:word2vec}
+\end{figure}
+
+This feature representation is generated through an unsupervised feedforward neural network. There
+are two models for \texttt{word2vec} -- \textbf{continuous bag of words} (CBOW) and \textbf{skip-gram}.
+CBOW is a bag of words method that takes into
+account the context of a word and tries to predict this word whose context it has been given.
+CBOW takes the one-hot-encoding vectors
+for words within a given window around the selected word in a sentence. These vectors are averaged,
+and fed through a feedforward neural network with a single hidden layer 
+and output layer to try to predict the selected word. The output layer is what's known as a \textbf{softmax}
+layer, which is a generalized version of the logistic sigmoid function explained in \cref{sec:prepNeurons},
+applying the sigmoid function to every element of a vector.
+The weights for this hidden layer, after training, are then translated into the feature extractor.
+The skip-gram model works in the opposite
+direction -- given a selected word, it predicts the
+context of the word (average of the words within the specified window around the selected word).
+The skip-gram model is much slower to train, but is more accurate for infrequent words.
+Due to the repetitive nature of our dataset, we will be using CBOW.
+
+\missingfigure[figheight=6cm]{TODO: FIGURES OF WORD2VEC}
+
+The \texttt{doc2vec} method abstracts the \texttt{word2vec} methods to a vector representation
+for a whole document. The model predicts the a word within a paragraph given its context, as well
+as a paragraph ID, represented in a one-hot-encoding vector. The context and paragraph ID can then
+be either averaged together, such as in CBOW in \texttt{word2vec}, or concatenated. Averaging
+results in a model that disregards word order, but requires substantially fewer
+examples to train. We will be using the averaging method, as our dataset is not sufficiently
+large for concatenation. The architecture for single hidden layer and softmax output layer are
+the same as for the \texttt{word2vec} model, meaning we use the hidden layer's weights as our
+feature extractor after training the \texttt{doc2vec} model.
+
+\missingfigure[figheight=6cm]{TODO: FIGURES OF DOC2VEC}
+
+\subsection{Naive Bayes}
+\label{sec:impNB}
+This section will explain the implementation of each Naive Bayes classifier.
+
+The following two versions of the Naive Bayes classifier were chosen because they are seemingly
+well-suited to our two feature extraction methods. Gaussian Naive Bayes, which accepts an input
+feature vector of real values (with the assumption that the features have a Gaussian distribution),
+is the most fitting NB classifier for \texttt{doc2vec}. Multinomial Naive Bayes,
+which accepts an input feature vector where each feature is a count of an event (with the assumption
+that the counts have a Multinomial distribution), is perfect for Bag of Words.
+
+\subsubsection{Gaussian Naive Bayes}
+\label{sec:impGNB}
+
+Gaussian Naive Bayes was implemented by
+
+\subsubsection{Multinomial Naive Bayes}
 \label{sec:impMNB}
 
-\subsection{Gaussian Naive Bayes}
-\label{sec:impGNB}
+
+
 
 \subsection{Support Vector Machine}
 \label{sec:impSVM}
 
 \section{Price Prediction}
 \label{sec:impFin}
+This section will detail the implementation of the price prediction portion
+of the project. We will discuss the decisions behind data selection,
+the different technical features that were chosen, and the implementation
+of the LSTM network.
 
 \subsection{Data}
 \label{sec:impFinData}
 
+Because of the need for manual labelling of the Twitter dataset, as mentioned in \cref{sec:impFailed} and 
+\cref{sec:impSentiData}, a financial dataset with specific requirements was chosen:
+
+\begin{itemize}
+\item
+The dataset must not span too large a time period, to ensure the corresponding Twitter dataset is not too large to label
+
+\item
+The dataset must not include too many stocks, to ensure the corresponding Twitter dataset is not too large to label
+
+\item
+The dataset must include enough samples, to ensure the LSTM network has sufficient data for training
+
+\item
+The dataset must be composed of relevant stocks whose companies regularly receive media attention
+
+\item
+The dataset preferably includes a representative group of stocks for an industry or the global economy
+
+\end{itemize}
+
+The resulting dataset comprises of a 6-month period of data for the five highest market cap\footnote{Market cap, 
+or market capitalization, is the total market value of a company's shares} stocks on the
+NASDAQ exchange: Apple, Amazon, Alphabet\footnotemark ($\times2$), and Microsoft.
+
+
+\footnotetext{Alphabet is listed twice on the NASDAQ exchange, as GOOGL and GOOG. These are two separate stocks: GOOGL
+holders have voting rights while GOOG holders do not}
+
 \subsection{Features}
 \label{sec:impFinFeat}
 
+\todo[inline]{Write about technical indicators}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{ll}
+\toprule
+\textbf{Feature}          					& \textbf{Description} \\ \midrule
+\begin{tabular}[c]{@{}l@{}}Williams percentage range\\(Williams \%R)\end{tabular}	& \begin{tabular}[c]{@{}l@{}}Measures overbought and oversold levels,used\\with an interval to find highest and lowest prices\\during time frame\end{tabular} \\[2.5ex]\midrule
+Rate of change (RoC)						& Ratio of change from previous price \\[0.5ex]\midrule
+Momentum									& Change of price within an interval \\[0.5ex]\midrule
+Relative strength index (RSI)				& \begin{tabular}[c]{@{}l@{}}Compares magnitude of recent gains andlosses\\to measure speed and change ofprice\\movements, primarily used to gauge overbuying\\and overselling\end{tabular} \\[3.5ex]\midrule
+\begin{tabular}[c]{@{}l@{}}Triple exponential moving\\average (TEMA)\end{tabular} 	& Smooth price fluctuations and filter out volatility \\[2ex] \bottomrule
+
+\end{tabular}
+\caption{Financial technical indicators used as features}
+\label{table:fintech}
+\end{table}
+
+
+
+\begin{itemize}
+\item
+Williams \%R
+\begin{equation}
+\frac{\text{highest price} - \text{current price}}{\text{highest price} - \text{lowest price}}
+\end{equation}
+
+\item
+RoC
+\begin{equation}
+\frac{\text{current price}}{\text{previous price}} - 1
+\end{equation}
+
+\item
+Momentum
+\begin{equation}
+\text{current price} - \text{price at previous interval}
+\end{equation}
+
+\item
+RSI
+\begin{align}
+\begin{split}
+&\frac{100 \times \text{average}(\text{upgain})}{\text{average}(\text{upgain}) + \text{average}(\text{downloss})}\\
+\intertext{where}
+\text{upgain} = &\text{price} - \text{previous price} \quad \text{when} \quad \text{price} > \text{previous price}\\
+\intertext{and}
+\text{downloss} = &\text{previous price} - \text{price} \quad \text{when} \quad \text{price} < \text{previous price}
+\end{split}
+\end{align}
+
+\item
+TEMA
+
+
+\end{itemize}
+
 \subsection{Long Short-Term Memory}
 \label{sec:ImplLSTM}
+
+This section will detail
+
+\todo[inline]{TODO: talk about how not having tweets for a certain time period is fine, because of LSTM architecture}
+\todo[inline]{TODO: measure mean and stdev of random agents}
+
+\subsubsection{Initialisation}
+
+\subsubsection{Normalisation}
+
+\subsubsection{Hyperparameters}
+
+\subsubsection{Dropout}
+
+\subsubsection{Early Stopping}
+
+
+
+\section{Testing Framework}
+
+\missingfigure[figheight=6cm]{UML diagram of framework}
+
+\subsection{Hyperparameter}
+
+\subsection{Random Agents}
+
 
 \chapter{Evaluation}
 
@@ -1243,6 +1587,9 @@ converted to a custom Tweet object, and returned from the original function call
 \section{Results}
 
 \section{Lessons Learned}
+
+\todo[inline]{TODO: mention careful selection of data. would have been better to pick one/two stocks and do daily intervals, so more news for each interval
+without overwhelming twitter labelling}
 
 \section{Further Work}
 
