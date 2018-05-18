@@ -1,0 +1,51 @@
+Meeting Notes/Questions:
+
+Ask about how to calculate confidence interval for the random agents: agent is run many times AND collects many samples
+	- Do I need to collect standard variation on a per-sample basis? or standard deviation on a per-run basis
+	- What to use for "sample size" in T-test
+	
+	- standard deviation/confidence interval of MSE:
+		- chi squared distribution?
+		
+	
+	calculating expected loss, so should be able to take stdev of squared losses?
+	
+	
+diss changes:
+	- how to cut down on words?
+		- get rid of semi supervised learning?
+		- get rid of some of introduction? (related works)?
+		- get rid of in-depth talk about backpropagation and neural network background?
+		- get rid of in-depth mathematical formulation for navie bayes?
+	- write more pseudocode?
+	- run through overall structure
+	
+	
+	-use acronyms
+	- just try to cut words instead
+	
+Show demo:
+	- In mainrun:
+		- newTraining = true
+		
+		then
+		
+		- trained = false
+		
+		then
+		
+		- trained = true
+		
+make up mind about url formatting in footnotes
+periods in footnotes
+move MLP diagram up
+
+page 23: my first experimental foray
+
+for confidence intervals : can't include confidence intervals for stock price prediction since no perturbations in data
+
+hyperparameters list has periods
+
+maybe make early stoppign section dropout and early stopping?
+
+5/17/2018 4:33 is without sentiFeats
